@@ -13,7 +13,7 @@ def main() -> None:
     else:
         print("Welcome to the construct\n")
         in_venv = True
-    print(f"Current Python: {sys.executable}")
+    print(f"Current Python: {os.path.realpath(sys.executable)}")
     print("Virtual Environment: ", end="")
     if not in_venv:
         print(" None detected\n")
