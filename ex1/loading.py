@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import urllib.request
-import urllib.parse
 import json
 import time
 import io
@@ -14,7 +13,8 @@ def fetch_position() -> list:
     current_time: int = int(time.time())
     time_stamps: list[int] = [current_time - (i*300) for i in range(12)]
     ts_str = ",".join(str(t) for t in time_stamps)
-    url = f"https://api.wheretheiss.at/v1/satellites/25544/positions?timestamps={ts_str}"
+    url = f"https://api.wheretheiss.at/v1/satellites/25544/positions?\
+        timestamps={ts_str}"
     with urllib.request.urlopen(url) as response:
         return json.loads(response.read())
 
@@ -26,7 +26,8 @@ def process_data(data: list) -> pd.DataFrame:
 
 
 def load_world_map():
-    url = "https://upload.wikimedia.org/wikipedia/commons/6/6b/Blank_Map_of_The_World_Equirectangular_Projection.png"
+    url = "https://upload.wikimedia.org/wikipedia/commons/6/6b/\
+        Blank_Map_of_The_World_Equirectangular_Projection.png"
     req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
     with urllib.request.urlopen(req) as response:
         img_data = io.BytesIO(response.read())
