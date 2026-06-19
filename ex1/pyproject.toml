@@ -1,16 +1,15 @@
+
 [project]
 name = "ex1"
 version = "0.1.0"
-description = ""
+description = "Visualization of ISS orbit."
 authors = [
     {name = "hkanamit"}
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 dependencies = [
-    "numpy>=2.2.6",
-    "matplotlib>=3.10.9",
-    "pandas>=2.3.3",
 ]
+
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
