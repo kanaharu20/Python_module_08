@@ -13,9 +13,9 @@ def main() -> None:
     else:
         print("Welcome to the construct\n")
         in_venv = True
-    print(f"Current Python: {os.path.realpath(sys.executable)}")
-    print("Virtual Environment: ", end="")
     if not in_venv:
+        print(f"Current Python: {os.path.realpath(sys.executable)}")
+        print("Virtual Environment: ", end="")
         print(" None detected\n")
         print(
             "WARNING: You're in the global environment!\n"
@@ -28,6 +28,8 @@ def main() -> None:
             "matrix_env\\Scripts\\activate # On Windows\n")
         print("Then run this program again.")
     else:
+        print(f"Current Python: {sys.executable}")
+        print("Virtual Environment: ", end="")
         venv_name = os.path.basename(sys.prefix)
         print(venv_name)
         print(f"Environment Path: {sys.prefix}\n")
