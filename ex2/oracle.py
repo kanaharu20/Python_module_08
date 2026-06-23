@@ -10,7 +10,7 @@ def main() -> None:
 
     load_dotenv()
     print("Configuration loaded:")
-    config: dict[str, str] = {}
+    config: dict[str, str | None] = {}
     config["Mode"] = os.getenv("MATRIX_MODE")
     config["Database"] = os.getenv("DATABASE_URL")
     config["API Access"] = os.getenv("API_KEY")
@@ -19,16 +19,16 @@ def main() -> None:
 
     missing_config: list[str] = []
     for key in config:
-        if config[key] == "":
+        if config[key] == "" or config[key] is None:
             missing_config.append(key)
 
     for key in config:
         if key == "Mode":
-            if key in ["development", "production"]:
-                print(f"{key}: {config['Mode']}")
+            if config[key] in ["development", "production"]:
+                print(f"{key}: {config[key]}")
             else:
                 print(f"{config[key]}: Invalid MATRIX_MODE")
-        elif key == "Databese":
+        elif key == "Database":
             if config['Mode'] == "development":
                 print(f"{key}: Connected to local instance")
             elif config['Mode'] == "production":
@@ -52,7 +52,7 @@ def main() -> None:
     if not missing_config:
         print("[OK] .env file properly configured")
     else:
-        print("[ERROR] .env file not properly configured", file=sys.stderr)
+        print("[ERROR] .env file not properly configured")
         for key in missing_config:
             print(f"  - {key}")
     print("[OK] Production overrides available")

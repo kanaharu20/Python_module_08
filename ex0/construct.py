@@ -16,7 +16,7 @@ def main() -> None:
     if not in_venv:
         print(f"Current Python: {os.path.realpath(sys.executable)}")
         print("Virtual Environment: ", end="")
-        print(" None detected\n")
+        print("None detected\n")
         print(
             "WARNING: You're in the global environment!\n"
             "The machines can see everything you install.\n"
@@ -40,7 +40,7 @@ def main() -> None:
             )
         print(
             "Package installation path: \n"
-            f"{site.getusersitepackages()}"
+            f"{site.getusersitepackages()[0]}"
             )
 
 
