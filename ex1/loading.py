@@ -1,13 +1,26 @@
 #!/usr/bin/env python3
 
+import importlib
 import importlib.util
 import urllib.request
 import json
 import time
 import io
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
+
+
+def check_deps() -> dict:
+    deps = {
+        "numpy": "np",
+        "pandas": "pd",
+        "matplotlib": "matplotlib",
+        "matplotlib.pyplot": "plt",
+    }
+    mods = {}
+    for module_name, alias in deps.items():
+        if importlib.util.find_spec(module_name) is None:
+            raise ImportError(f"[MISSING] {module_name} - install required")
+        mods[alias] = importlib.import_module(module_name)
+    return mods
 
 
 def fetch_position() -> list:
@@ -22,14 +35,14 @@ def fetch_position() -> list:
         return json.loads(response.read())
 
 
-def process_data(data: list) -> pd.DataFrame:
+def process_data(data: list, pd) -> object:
     df = pd.DataFrame(data)
     df["time"] = pd.to_datetime(df["timestamp"], unit="s")
-    print("Processing 1000 data points...")
+    print("Processing 12 data points...")
     return df
 
 
-def load_world_map():
+def load_world_map(plt) -> object:
     url = (
         "https://upload.wikimedia.org/wikipedia/commons/6/6b/"
         "Blank_Map_of_The_World_Equirectangular_Projection.png"
@@ -37,19 +50,21 @@ def load_world_map():
     req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
     with urllib.request.urlopen(req) as response:
         img_data = io.BytesIO(response.read())
-    return plt.imread(img_data, format="jpg")
+    return plt.imread(img_data, format="png")
 
 
-def plot_orbit(df: pd.DataFrame) -> None:
+def plot_orbit(df, mods: dict) -> None:
+    np = mods["np"]
+    plt = mods["plt"]
     fig, ax = plt.subplots(figsize=(14, 7))
     ax.set_xlim(-180, 180)
     ax.set_ylim(-90, 90)
     ax.plot(df["longitude"], df["latitude"], color="red")
-    ax.scatter(df["longitude"][0], df["latitude"][0], color="yellow", zorder=5)
+    ax.scatter(df["longitude"].iloc[0], df["latitude"].iloc[0], color="yellow", zorder=5)
     velocities = np.array(df["velocity"])
     top_velocity = np.argmax(velocities)
     ax.scatter(
-        df["longitude"][top_velocity], df["latitude"][top_velocity],
+        df["longitude"].iloc[top_velocity], df["latitude"].iloc[top_velocity],
         color="green", s=100, zorder=6,
         label=f"Fastest: {velocities[top_velocity]:.1f} km/h"
                )
@@ -57,39 +72,73 @@ def plot_orbit(df: pd.DataFrame) -> None:
     ax.set_title("ISS Orbit Path (last 1 hours)")
     ax.set_xlabel("Longitude")
     ax.set_ylabel("Latitude")
-    img = load_world_map()
+    img = load_world_map(plt)
     ax.imshow(img, extent=(-180, 180, -90, 90), aspect="auto")
     ax.grid(True)
     print("Generating visualization...")
     plt.savefig("matrix_analysis.png")
-    plt.show()
 
 
 def load_status() -> None:
     print("\nLOADING STATUS: Loading programs..."
           "\nChecking dependencies:")
+    try:
+        mods = check_deps()
+        print(f"[OK] pandas ({mods['pd'].__version__}) "
+              "- Data manipulation ready")
+        print(f"[OK] numpy ({mods['np'].__version__}) "
+              "- Numerical computation ready")
+        if fetch_position() is not None:
+            if load_world_map(mods["plt"]) is not None:
+                print("[OK] requests - Network access ready")
+        print(f"[OK] matplotlib ({mods['matplotlib'].__version__}) "
+              "- Visualization ready")
+        print()
+        print("Analyzing Matrix data...")
+        data = fetch_position()
+        df = process_data(data, mods["pd"])
+        plot_orbit(df, mods)
+        print(
+            "Analysis complete!\n"
+            "Results saved to: matrix_analysis.png"
+            )
+    except ImportError as e:
+        print(e)
+        print_instraction()
 
-    if importlib.util.find_spec("pandas") is not None:
-        print("[OK] pandas (2.1.0) - Data manipulation ready")
-    if importlib.util.find_spec("numpy") is not None:
-        print("[OK] numpy (1.25.0) - Numerical computation ready")
-    if fetch_position() is not None and load_world_map() is not None:
-        print("[OK] requests (2.31.0) - Network access ready")
-    if importlib.util.find_spec("matplotlib") is not None:
-        print("[OK] matplotlib (3.7.2) - Visualization ready")
+
+def print_instraction() -> None:
     print()
-    print("Analyzing Matrix data...")
-    data = fetch_position()
-    df = process_data(data)
-    plot_orbit(df)
-    print(
-        "Analysis complete!\n"
-        "Results saved to: matrix_analysis.png"
-        )
+    print("Missing dependencies detected.")
+    print()
+    print("Install with pip:")
+    print("pip install -r requirements.txt")
+    print()
+    print("Or install with Poetry:")
+    print("poetry install")
+
+
+def pip_vs_poetry() -> None:
+    print("=== pip vs Poetry ===")
+
+    print("pip:")
+    print("- Uses requirements.txt")
+    print("- Installs dependencies with: pip install -r requirements.txt")
+    print("- Usually manages only package installation")
+    print("- Does not manage project metadata by itself")
+
+    print()
+    print("Poetry:")
+    print("- Uses pyproject.toml")
+    print("- Installs dependencies with: poetry install")
+    print("- Manages project metadata and dependencies together")
+    print("- Can create and manage virtual environments")
 
 
 def main() -> None:
     load_status()
+    print()
+    pip_vs_poetry()
 
 
 if __name__ == "__main__":
