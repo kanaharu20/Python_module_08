@@ -60,7 +60,10 @@ def plot_orbit(df, mods: dict) -> None:
     ax.set_xlim(-180, 180)
     ax.set_ylim(-90, 90)
     ax.plot(df["longitude"], df["latitude"], color="red")
-    ax.scatter(df["longitude"].iloc[0], df["latitude"].iloc[0], color="yellow", zorder=5)
+    ax.scatter(
+        df["longitude"].iloc[0], df["latitude"].iloc[0], color="yellow",
+        zorder=5
+        )
     velocities = np.array(df["velocity"])
     top_velocity = np.argmax(velocities)
     ax.scatter(

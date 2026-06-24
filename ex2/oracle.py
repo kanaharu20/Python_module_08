@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import os
-import sys
 from dotenv import load_dotenv
 
 
@@ -27,14 +26,14 @@ def main() -> None:
             if config[key] in ["development", "production"]:
                 print(f"{key}: {config[key]}")
             else:
-                print(f"{config[key]}: Invalid MATRIX_MODE")
+                print(f"{key}: Invalid MATRIX_MODE")
         elif key == "Database":
             if config['Mode'] == "development":
                 print(f"{key}: Connected to local instance")
             elif config['Mode'] == "production":
                 print(f"{key}: Connected to production instance")
             else:
-                print(f"{key} Unknown mode")
+                print(f"{key}: Unknown mode")
         elif key == "API Access":
             print("API Access: Authenticated")
         elif key == "Log level":
