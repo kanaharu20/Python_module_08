@@ -6,16 +6,17 @@ import urllib.request
 import json
 import time
 import io
+from typing import Any, cast
 
 
-def check_deps() -> dict:
+def check_deps() -> dict[str, Any]:
     deps = {
         "numpy": "np",
         "pandas": "pd",
         "matplotlib": "matplotlib",
         "matplotlib.pyplot": "plt",
     }
-    mods = {}
+    mods: dict[str, Any] = {}
     for module_name, alias in deps.items():
         if importlib.util.find_spec(module_name) is None:
             raise ImportError(f"[MISSING] {module_name} - install required")
@@ -23,7 +24,7 @@ def check_deps() -> dict:
     return mods
 
 
-def fetch_position() -> list:
+def fetch_position() -> list[dict[str, Any]]:
     current_time: int = int(time.time())
     time_stamps: list[int] = [current_time - (i*300) for i in range(12)]
     ts_str = ",".join(str(t) for t in time_stamps)
@@ -32,17 +33,17 @@ def fetch_position() -> list:
         f"positions?timestamps={ts_str}"
         )
     with urllib.request.urlopen(url) as response:
-        return json.loads(response.read())
+        return cast(list[dict[str, Any]], json.loads(response.read()))
 
 
-def process_data(data: list, pd) -> object:
+def process_data(data: list[dict[str, Any]], pd: Any) -> Any:
     df = pd.DataFrame(data)
     df["time"] = pd.to_datetime(df["timestamp"], unit="s")
-    print("Processing 12 data points...")
+    print(f"Processing {len(data)} data points...")
     return df
 
 
-def load_world_map(plt) -> object:
+def load_world_map(plt: Any) -> Any:
     url = (
         "https://upload.wikimedia.org/wikipedia/commons/6/6b/"
         "Blank_Map_of_The_World_Equirectangular_Projection.png"
@@ -53,7 +54,7 @@ def load_world_map(plt) -> object:
     return plt.imread(img_data, format="png")
 
 
-def plot_orbit(df, mods: dict) -> None:
+def plot_orbit(df: Any, mods: dict[str, Any]) -> None:
     np = mods["np"]
     plt = mods["plt"]
     fig, ax = plt.subplots(figsize=(14, 7))
@@ -70,9 +71,9 @@ def plot_orbit(df, mods: dict) -> None:
         df["longitude"].iloc[top_velocity], df["latitude"].iloc[top_velocity],
         color="green", s=100, zorder=6,
         label=f"Fastest: {velocities[top_velocity]:.1f} km/h"
-               )
+        )
     ax.legend()
-    ax.set_title("ISS Orbit Path (last 1 hours)")
+    ax.set_title("ISS Orbit Path (last 1 hour)")
     ax.set_xlabel("Longitude")
     ax.set_ylabel("Latitude")
     img = load_world_map(plt)
@@ -91,14 +92,12 @@ def load_status() -> None:
               "- Data manipulation ready")
         print(f"[OK] numpy ({mods['np'].__version__}) "
               "- Numerical computation ready")
-        if fetch_position() is not None:
-            if load_world_map(mods["plt"]) is not None:
-                print("[OK] requests - Network access ready")
+        data = fetch_position()
+        print("[OK] network - Network access ready")
         print(f"[OK] matplotlib ({mods['matplotlib'].__version__}) "
               "- Visualization ready")
         print()
         print("Analyzing Matrix data...")
-        data = fetch_position()
         df = process_data(data, mods["pd"])
         plot_orbit(df, mods)
         print(
@@ -107,10 +106,10 @@ def load_status() -> None:
             )
     except ImportError as e:
         print(e)
-        print_instraction()
+        print_instruction()
 
 
-def print_instraction() -> None:
+def print_instruction() -> None:
     print()
     print("Missing dependencies detected.")
     print()

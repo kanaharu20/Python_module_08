@@ -13,7 +13,7 @@ def main() -> None:
     config["Mode"] = os.getenv("MATRIX_MODE")
     config["Database"] = os.getenv("DATABASE_URL")
     config["API Access"] = os.getenv("API_KEY")
-    config["Log level"] = os.getenv("LOG_LEVEL")
+    config["Log Level"] = os.getenv("LOG_LEVEL")
     config["Zion Network"] = os.getenv("ZION_ENDPOINT")
 
     missing_config: list[str] = []
@@ -35,8 +35,11 @@ def main() -> None:
             else:
                 print(f"{key}: Unknown mode")
         elif key == "API Access":
-            print("API Access: Authenticated")
-        elif key == "Log level":
+            if config[key]:
+                print(f"{key}: Authenticated")
+            else:
+                print(f"{key}: [MISSING] API_KEY not configured")
+        elif key == "Log Level":
             if config['Mode'] == "development":
                 print(f"{key}: {config[key]}")
             elif config['Mode'] == "production":
@@ -44,7 +47,10 @@ def main() -> None:
             else:
                 print(f"{key}: Unknown mode")
         else:
-            print(f"{key}: {config[key]}")
+            if config[key]:
+                print(f"{key}: Online")
+            else:
+                print(f"{key}: Offline")
     print()
     print("Environment security check:")
     print("[OK] No hardcoded secrets detected")

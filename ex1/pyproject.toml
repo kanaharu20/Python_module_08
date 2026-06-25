@@ -2,7 +2,7 @@
 [project]
 name = "ex1"
 version = "0.1.0"
-description = "Visuaization of ISS orbit"
+description = "Visualization of ISS orbit"
 authors = [
     {name = "hkanamit"}
 ]

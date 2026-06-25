@@ -39,8 +39,8 @@ def main() -> None:
             "the global system.\n"
             )
         print(
-            "Package installation path: \n"
-            f"{site.getusersitepackages()[0]}"
+            "Package installation path:\n"
+            f"{site.getsitepackages()[0]}"
             )
 
 
